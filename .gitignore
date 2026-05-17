@@ -1,0 +1,17 @@
+# dependencies
+node_modules/
+
+# environment variables - never commit these
+.env
+
+# logs
+logs/
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# docker volumes
+docker-volumes/
