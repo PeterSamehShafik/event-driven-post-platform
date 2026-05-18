@@ -36,4 +36,4 @@ class PostEventPublisher {
 
 }
 
-export default new PostEventPublisher();
+export default PostEventPublisher

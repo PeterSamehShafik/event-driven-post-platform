@@ -1,10 +1,12 @@
-import PostRepository from '../../infrastructure/database/repositories/MongoPostRepository.js';
 
 class ListPosts {
+  constructor(postRepository) {
+    this.postRepository = postRepository;
+  }
+
   async execute() {
-    const posts = await PostRepository.findAll();
-    return posts;
+    return await this.postRepository.findAll();
   }
 }
 
-export default new ListPosts();
+export default ListPosts; 

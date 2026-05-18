@@ -1,17 +1,17 @@
-
-import PostRepository from '../../infrastructure/database/repositories/MongoPostRepository.js'
-import PostEventPublisher from '../../infrastructure/messaging/PostEventPublisher.js'
-import ValidationError from '../../domain/errors/ValidationError.js'
-import Post from '../../domain/entities/Posts.js';
+import Post from '../../domain/entities/Post.js';
 
 class CreatePost {
-  async execute(data) {
-    const post = new Post(data);        
-    const saved = await PostRepository.save(post); 
-    await PostEventPublisher.publishPostCreated(saved);
+  constructor(postRepository, eventPublisher) {
+    this.postRepository = postRepository;
+    this.eventPublisher = eventPublisher;
+  }
 
+  async execute(data) {
+    const post = new Post(data);
+    const saved = await this.postRepository.save(post);
+    await this.eventPublisher.publishPostCreated(saved);
     return saved;
   }
 }
 
-export default new CreatePost();
+export default CreatePost;  

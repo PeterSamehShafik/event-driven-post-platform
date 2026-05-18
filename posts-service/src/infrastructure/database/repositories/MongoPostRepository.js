@@ -20,4 +20,4 @@ class MongoPostRepository extends IPostRepository {
     }
 }
 
-export default new MongoPostRepository()
+export default MongoPostRepository

@@ -1,10 +1,11 @@
-import PostRepository from '../../infrastructure/database/repositories/MongoPostRepository.js';
-
 class GetPost {
+  constructor(postRepository) {
+    this.postRepository = postRepository;
+  }
+
   async execute(id) {
-    const post = await PostRepository.findById(id);
-    return post;
+    return await this.postRepository.findById(id);
   }
 }
 
-export default new GetPost();
+export default GetPost; 
