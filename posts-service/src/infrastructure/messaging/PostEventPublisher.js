@@ -1,4 +1,3 @@
-// infrastructure/messaging/PostEventPublisher.js
 import { producer } from './kafkaClient.js';
 
 class PostEventPublisher {

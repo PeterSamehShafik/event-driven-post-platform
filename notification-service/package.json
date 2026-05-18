@@ -5,12 +5,14 @@
   "type": "module",
   "main": "server.js",
   "scripts": {
-    "dev": "node --watch server.js",
-    "start": "node server.js"
+    "dev": "node --env-file=.env.development --watch server.js",
+    "start": "node --env-file=.env.production server.js",
+    "lint": "eslint ."
   },
   "dependencies": {
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
-    "kafkajs": "^2.2.4"
+    "kafkajs": "^2.2.4",
+    "mongoose": "^9.6.2"
   }
 }

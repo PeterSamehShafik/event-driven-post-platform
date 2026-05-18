@@ -1,17 +1,22 @@
-import express from "express";
-import dotenv from "dotenv";
-dotenv.config();
-
-const app = express();
-
-app.use(express.json());
-
-app.get("/healthy", (req, res) => {
-  res.status(200).json({ service: "notification-service" });
-});
+import app from './app.js'
+import { connectDB } from './src/infrastructure/database/mongoConnection.js'
+import { kafkaConsumer } from './src/container/index.js'
+import "dotenv/config";
 
 const PORT = process.env.PORT || 4000;
 
-app.listen(PORT, () => {
-  console.log(`notification-service running on port ${PORT}........`);
-});
+async function bootstrap() {
+  try {
+    await connectDB();
+    await kafkaConsumer.start();
+
+    app.listen(PORT, () => {
+      console.log(`Notification service running on port ${PORT}....`);
+    });
+  } catch (error) {
+    console.error("Bootstrap failed to start notification service:", error);
+    process.exit(1);
+  }
+}
+
+bootstrap();
