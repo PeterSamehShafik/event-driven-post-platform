@@ -3,6 +3,11 @@ node_modules/
 
 # environment variables - never commit these
 .env
+.env.local
+.env.development
+.env.production
+.env.test
+
 
 # logs
 logs/
