@@ -1,3 +1,5 @@
+import ValidationError from "../errors/ValidationError.js"
+
 class Post {
   constructor({ title, content }) {
     this.validate({ title, content });
