@@ -1,4 +1,4 @@
-import Post from '../../domain/entities/Post.js';
+import Post from '../../domain/entities/Posts.js';
 
 class CreatePost {
   constructor(postRepository, eventPublisher) {
