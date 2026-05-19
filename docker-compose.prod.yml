@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  mongo:
+    ports: !override [] # Blocks external direct connections to port 27017
+    restart: always
+
+  kafka:
+    ports: !override [] # Blocks external direct connections to port 9092
+    restart: always
+    environment:
+      # We change EXTERNAL to point to localhost inside the EC2 environment
+      KAFKA_ADVERTISED_LISTENERS: 'INTERNAL://kafka:19092,EXTERNAL://localhost:9092'
+
+  kafka-ui:
+    ports: !override [] # Handled securely by Nginx
+    restart: always
+    environment:
+      DYNAMIC_CONFIG_ENABLED: 'false' # Turn off runtime edits
+      KAFKA_CLUSTERS_0_READONLY: 'true' # Enforces Read-Only Mode in UI
+
+  posts-service:
+    ports: !override [] # Handled by Nginx
+    restart: always
+    env_file:
+      - ./posts-service/.env.production
+
+  notification-service:
+    ports: !override [] # Handled by Nginx
+    restart: always
+    env_file:
+      - ./notification-service/.env.production
