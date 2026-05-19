@@ -1,0 +1,98 @@
+{
+  "info": {
+    "_postman_id": "c30fc325-454d-4e19-add4-983654f7393a",
+    "name": "Event-Driven Backend",
+    "description": "Posts & Notification microservices.\n\nSet `{{host}}` in your environment:\n- **Local:** `http://localhost:5000`\n- **Production:** `http://<your-ec2-ip>`\n\nAfter creating a post, copy the returned `_id` into the `{{postId}}` variable.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Posts API",
+      "item": [
+        {
+          "name": "Create Post",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"title\": \"My First Post\",\n    \"content\": \"Hello World!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{host}}/api/posts",
+              "host": ["{{host}}"],
+              "path": ["api", "posts"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List Posts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{host}}/api/posts",
+              "host": ["{{host}}"],
+              "path": ["api", "posts"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Post by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{host}}/api/posts/{{postId}}",
+              "host": ["{{host}}"],
+              "path": ["api", "posts", "{{postId}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Notification API",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{host}}/api/notification/healthy",
+              "host": ["{{host}}"],
+              "path": ["api", "notification", "healthy"]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "host",
+      "value": "http://localhost:5000",
+      "description": "Local: http://localhost:5000 | Production: http://<your-ec2-ip>"
+    },
+    {
+      "key": "postId",
+      "value": "",
+      "description": "MongoDB ObjectId — copy from Create Post response"
+    }
+  ]
+}
