@@ -8,7 +8,7 @@ A microservices system built with Node.js, MongoDB, Kafka, and Docker.
 
 ## How to run
 ```bash
-docker compose up --build
+docker compose --env-file .env.production up --build -d
 ```
 
 ## API Endpoints
