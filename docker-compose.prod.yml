@@ -1,19 +1,21 @@
 services:
   mongo:
+    ports: !override []
     restart: always
 
   kafka:
+    ports: !override []
     restart: always
-    environment:
-      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:19092,EXTERNAL://13.223.200.168:9092
 
   posts-service:
+    ports: !override []
     restart: always
-    ports:
-      - "3000:3000"
 
   notification-service:
+    ports: !override []
     restart: always
 
-  # optional
-  kafka-ui:
+  nginx:
+    ports: !override
+      - "5000:80"
+    restart: always
