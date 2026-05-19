@@ -1,4 +1,4 @@
-import { validatePostCreatedEvent } from '@myapp/shared-events/events/post-created.event.js';
+import { validatePostCreatedEvent } from '@myapp/shared-events/events/post-created-event.js';
 
 
 class ProcessPostCreated {

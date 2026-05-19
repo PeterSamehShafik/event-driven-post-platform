@@ -6,7 +6,7 @@ class NotificationRepository {
         return await doc.save()
     }
 
-    async findById(id) {
+    async findByPostId(id) {
         const doc = await NotificationModel.findById(id)
         return doc
     }

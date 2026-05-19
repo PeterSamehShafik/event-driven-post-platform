@@ -1,5 +1,5 @@
 import { kafka, producer, CompressionTypes } from './kafkaClient.js';
-import { createPostCreatedEvent, validatePostCreatedEvent } from '@myapp/shared-events/events/post-created.event.js';
+import { createPostCreatedEvent, validatePostCreatedEvent } from '@myapp/shared-events/events/post-created-event.js';
 
 
 
