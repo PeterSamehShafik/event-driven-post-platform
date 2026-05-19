@@ -7,7 +7,6 @@ export async function initializeTopics() {
   try {
     console.log("Connecting to Kafka Admin Client...");
     await admin.connect();
-
     const targetTopic = process.env.POST_CREATED_TOPIC;
     const existingTopics = await admin.listTopics();
 
@@ -22,6 +21,7 @@ export async function initializeTopics() {
             replicationFactor: 1,
           },
         ],
+        
       });
       console.log(`Topic "${targetTopic}" created successfully.`);
     } else {

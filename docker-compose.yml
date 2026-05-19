@@ -27,40 +27,113 @@ services:
     networks:
       - kafka-network
     environment:
-      # --- KRaft Cluster Configuration ---
-      CLUSTER_ID: '4L6g3nShT-eMCtK--X86sw'
-      KAFKA_NODE_ID: 1
-      KAFKA_PROCESS_ROLES: 'broker,controller'
-      KAFKA_CONTROLLER_QUORUM_BOOTSTRAP_SERVERS: 'localhost:9093'
-      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
-      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka:9093'
 
-      # --- Networking & Listeners ---
-      KAFKA_LISTENERS: 'INTERNAL://0.0.0.0:19092,EXTERNAL://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093'
-      KAFKA_ADVERTISED_LISTENERS: 'INTERNAL://kafka:19092,EXTERNAL://localhost:9092'
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT'
+      # ── KRaft Identity ────────────────────────────────────────────
+      # Stable UUID that binds all brokers to the same cluster.
+      # All brokers in a multi-node setup must share this exact value.
+      CLUSTER_ID: '4L6g3nShT-eMCtK--X86sw'
+
+      # Unique passport number for this specific broker instance.
+      # In multi-broker: each machine gets a different ID (1, 2, 3...).
+      KAFKA_NODE_ID: 1
+
+      # This node plays both roles — stores data AND manages cluster metadata.
+      # In production: separate dedicated controller and broker nodes.
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+
+      # ── Listener Roles ────────────────────────────────────────────
+      # Which listener name handles controller-to-controller quorum traffic.
+      # Must match one of the names defined in KAFKA_LISTENERS.
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+
+      # Which listener name brokers use to talk to each other (replication, metadata).
+      # Separate from client traffic so internal and external concerns don't mix.
       KAFKA_INTER_BROKER_LISTENER_NAME: 'INTERNAL'
 
-      # --- Topic Constraints ---
+      # ── Listeners ─────────────────────────────────────────────────
+      # Physical ports this broker binds to and listens on.
+      # INTERNAL  → container-to-container traffic (Node.js services inside Docker)
+      # EXTERNAL  → host machine access (your terminal, Kafka UI tools)
+      # CONTROLLER → KRaft quorum voting between controller nodes
+      # 0.0.0.0 = accept connections on all network interfaces.
+      KAFKA_LISTENERS: 'INTERNAL://0.0.0.0:19092,EXTERNAL://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093'
+
+      # The address this broker advertises to clients during metadata discovery.
+      # INTERNAL → Docker service name (reachable by other containers on kafka-network)
+      # EXTERNAL → localhost (reachable from your host machine)
+      # Rule: must be reachable by whoever is connecting, not just what the broker binds to.
+      KAFKA_ADVERTISED_LISTENERS: 'INTERNAL://kafka:19092,EXTERNAL://localhost:9092'
+
+      # Registered voter list for KRaft leader elections.
+      # Format: {nodeId}@{host}:{controllerPort}
+      # Multi-broker example: '1@kafka1:9093,2@kafka2:9093,3@kafka3:9093'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka:9093'
+
+      # Maps each listener name to its security protocol.
+      # PLAINTEXT = no encryption (dev only).
+      # Production: SASL_SSL:SASL_SSL for authentication + TLS encryption.
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT'
+
+      # ── Topic Defaults ────────────────────────────────────────────
+      # Prevent typos in topic names from silently creating ghost topics
+      # with wrong partition count and replication factor defaults.
+      # Topics are created explicitly via Admin Client at startup.
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'false'
 
-      # --- Essential Internal Topic Configurations ---
-      # Crucial for single-node setups to prevent default replication errors (default is 3)
+      # Messages are retained on disk for 7 days.
+      # After this, old log segments are deleted to free storage.
+      # Consumers that fall behind have 7 days to catch up before data is gone.
+      KAFKA_LOG_RETENTION_HOURS: 168
+
+      # Default replication factor for any topic created without an explicit value.
+      # 1 = single copy, dev only — no fault tolerance.
+      # Production: set to 3 so every partition survives 2 broker failures.
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 1
+
+      # Commented out because KAFKA_AUTO_CREATE_TOPICS_ENABLE=false makes
+      # this irrelevant — topics are created with explicit partition counts.
+      # KAFKA_NUM_PARTITIONS: 1
+
+      # ── Internal System Topics ────────────────────────────────────
+      # Kafka manages two critical internal topics automatically.
+      # Their replication must be ≤ number of brokers in the cluster.
+      # Single-node dev: must be 1. Production 3-broker cluster: set to 3.
+
+      # __consumer_offsets: stores committed offsets for every consumer group.
+      # This is how Kafka remembers "where each consumer left off" across restarts.
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+      # __transaction_state: stores active transaction state — the PID,
+      # epoch, and sequence numbers used by idempotent producers and
+      # Kafka transactions (exactly-once semantics).
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+
+      # Minimum in-sync replicas required before a transaction write is accepted.
+      # Guards the transaction state log against partial writes.
+      # Single-node: 1. Production: 2 (survive one broker loss mid-transaction).
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
 
-      # --- Storage & Logging ---
+      # ── Storage ───────────────────────────────────────────────────
+      # Directory where Kafka writes partition log segments to disk.
+      # Each partition gets its own subdirectory of .log files here.
+      # Mapped to a named Docker volume so data survives container restarts.
       KAFKA_LOG_DIRS: '/var/lib/kafka/data'
+
     volumes:
       - kafka_data:/var/lib/kafka/data
+
     healthcheck:
+      # Kafka is marked healthy only when it responds to the broker API versions command.
+      # This is more reliable than checking if the container started —
+      # Kafka takes 20-30s to fully initialize after the process launches.
+      # Other services use depends_on: kafka: condition: service_healthy
+      # so they don't attempt connections before Kafka is actually ready.
       test: [ "CMD-SHELL", "/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092 > /dev/null 2>&1" ]
       interval: 10s
       timeout: 10s
       retries: 10
       start_period: 30s
-
+ 
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
     container_name: kafka-ui

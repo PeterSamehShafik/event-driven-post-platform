@@ -1,4 +1,6 @@
-import { producer } from './kafkaClient.js';
+import { kafka, producer, CompressionTypes } from './kafkaClient.js';
+
+
 
 class PostEventPublisher {
 
@@ -24,6 +26,9 @@ class PostEventPublisher {
           value: JSON.stringify(event),
         },
       ],
+      acks: -1,
+      compression: CompressionTypes.Snappy
+
     });
 
     console.log('Event published', {

@@ -7,4 +7,5 @@ const notificationRepository = new NotificationRepository();
 const processPostCreated = new ProcessPostCreated(notificationRepository);
 const kafkaConsumer = new KafkaConsumer(processPostCreated)
 
+
 export { kafkaConsumer }
