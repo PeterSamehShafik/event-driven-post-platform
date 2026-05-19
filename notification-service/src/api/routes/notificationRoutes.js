@@ -3,6 +3,6 @@ import NotificationController from "../controllers/NotificationController.js"
 
 const router = Router()
 
-router.get('/', NotificationController.health)
+router.get('/healthy', NotificationController.health)
 
 export default router
