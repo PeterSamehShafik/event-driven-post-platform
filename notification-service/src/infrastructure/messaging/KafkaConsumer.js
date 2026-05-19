@@ -1,4 +1,3 @@
-import { truncate } from "fs/promises";
 import { consumer } from "./kafkaClient.js";
 
 class KafkaConsumer {
@@ -9,7 +8,7 @@ class KafkaConsumer {
         await consumer.connect()
         await consumer.subscribe({
             topic: process.env.POST_CREATED_TOPIC,
-            fromBeginning: truncate,
+            fromBeginning: true,
         })
         console.log('Kafka consumer connected and subscribed');
 
@@ -25,13 +24,23 @@ class KafkaConsumer {
                         offset: message.offset,
                     });
                     await this.handler.handle(event)
-                } catch (error) {
+                    
+                    const next_offset = (BigInt(message.offset) + 1n).toString();
+                    await consumer.commitOffsets([{
+                        topic,
+                        partition,
+                        offset: next_offset
+                    }])
+                    console.log('Offset committed', { partition, next_offset: next_offset });
+
+                } catch (err) {
                     console.error('Failed to process message', {
                         error: err.message,
                         topic,
                         partition,
                         offset: message.offset,
                     });
+
                 }
             }
         },)

@@ -6,6 +6,11 @@ class NotificationRepository {
         return await doc.save()
     }
 
+    async findById(id) {
+        const doc = await NotificationModel.findById(id)
+        return doc
+    }
+
 }
 
 export default NotificationRepository
