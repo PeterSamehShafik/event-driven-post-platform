@@ -113,12 +113,14 @@ In production no service port is exposed to the internet. All traffic enters thr
 
 ### Prerequisites
 - Docker + Docker Compose
-- `.env.production` file in each service (see `.env.example`)
-
+- `.env.production` in each service folder (see `.env.example`)
+- `.env.production` at the root — used by Docker Compose itself (see `.env.example`)
+- 
 ### Development
 ```bash
 docker compose --env-file .env.production up -d --build
 ```
+API available at `http://localhost:5000/api`
 
 ### Production
 ```bash
@@ -127,6 +129,7 @@ docker compose --env-file .env.production \
   -f docker-compose.prod.yml \
   up -d --build
 ```
+API available at `http://<your-ec2-ip>/api`
 
 ---
 
