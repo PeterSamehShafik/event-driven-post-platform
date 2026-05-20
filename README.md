@@ -6,29 +6,19 @@ A backend system built with Node.js, MongoDB, Apache Kafka, and Docker — deplo
 
 ## Architecture Overview
 
-```
-┌─────────────────┐        ┌─────────────┐        ┌──────────────────────┐
-│   REST Client   │──────▶ │    Nginx    │──────▶ │    Posts Service     │
-└─────────────────┘        │ (API Gateway)│        │   Express + MongoDB  │
-                           └─────────────┘        └──────────┬───────────┘
-                                                             │
-                                                     publishes event
-                                                             │
-                                                             ▼
-                                                    ┌────────────────┐
-                                                    │     Kafka      │
-                                                    │  post.created  │
-                                                    └───────┬────────┘
-                                                            │
-                                                    consumes event
-                                                            │
-                                                            ▼
-                                                  ┌─────────────────────┐
-                                                  │ Notification Service │
-                                                  │  Consumer + MongoDB  │
-                                                  └─────────────────────┘
-```
+```mermaid
+flowchart TD
+    A[REST Client]
+    B[Nginx\nAPI Gateway]
+    C[Posts Service\nExpress + MongoDB]
+    D[Kafka\npost.created]
+    E[Notification Service\nConsumer + MongoDB]
 
+    A -->|HTTP request| B
+    B -->|proxy| C
+    C -->|publishes event| D
+    D -->|consumes event| E
+```
 ---
 
 ## Tech Stack
