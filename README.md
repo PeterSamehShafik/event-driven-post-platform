@@ -115,7 +115,7 @@ In production no service port is exposed to the internet. All traffic enters thr
 - Docker + Docker Compose
 - `.env.production` in each service folder (see `.env.example`)
 - `.env.production` at the root — used by Docker Compose itself (see `.env.example`)
-- 
+  
 ### Development
 ```bash
 docker compose --env-file .env.production up -d --build
